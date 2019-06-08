@@ -26,6 +26,11 @@ class MyWindow(QMainWindow):
         self.m_treeLayer = QTreeWidget()
         lay_grid.addWidget(self.m_treeLayer, 0,0)
         lay_grid.setColumnStretch(0,20)
-        lay_grid.setColumnStretch(1,80)
+        #lay_grid.setColumnStretch(1,80)
         
         #lay.addStretch()
+        
+        self.m_treeLayer.setColumnCount(2);
+        self.m_treeLayer.setHeaderLabels(["Слой", "Тип"])
+        self.m_treeLayer.addTopLevelItems([QTreeWidgetItem([txt, "group"]) for txt in ["LOL", "KEK", "LAL"]])
+        #self.m_treeLayer.addTopLevelItems([QTreeWidgetItem(["LOL", "KEK", "LAL"])])
