@@ -10,6 +10,7 @@ class MyWindow(QMainWindow):
         self.createUI()
         
         self.FileNamePSD = None
+        self.SelectedLayerNode = None
 
     def createUI(self):
         self.setCentralWidget(QWidget())
@@ -32,13 +33,13 @@ class MyWindow(QMainWindow):
         lay_grid.addWidget(self.m_treeLayer, 0,0)
         lay_grid.setColumnStretch(0,20)
         #lay_grid.setColumnStretch(1,80)
+        self.m_pbPrint = QPushButton("Print")
+        self.m_pbPrint.clicked.connect(lambda: print("Print LayerTree:", self.LayerTree))
+        lay_grid.addWidget(self.m_pbPrint, 1, 0)
         
-        #lay.addStretch()
-        
-        self.m_treeLayer.setColumnCount(2);
-        self.m_treeLayer.setHeaderLabels(["Слой", "Тип"])
-        self.m_treeLayer.addTopLevelItems([QTreeWidgetItem(["root", "group"])])
-        #self.m_treeLayer.addTopLevelItems([QTreeWidgetItem(["LOL", "KEK", "LAL"])])
+        self.m_treeLayer.setHeaderLabels(["Слой", "Тип", "visible"])
+        self.m_treeLayer.addTopLevelItems([QTreeWidgetItem(["root", "group", "true"])])
+        self.m_treeLayer.currentItemChanged.connect(self.on_currentItemChanged)
         
     def read_psd(self):
         from psd_tools import PSDImage
@@ -70,9 +71,21 @@ class MyWindow(QMainWindow):
         def show_group(lay_group, tree_item):
             if tree_item is None: return
             for node in lay_group:
-                itm = QTreeWidgetItem([node["name"], "group" if "group" in node else "img"])
+                vis = "false" if "visible" in node and node["visible"]==False else "true"
+                itm = QTreeWidgetItem([node["name"], "group" if "group" in node else "img", vis])
                 tree_item.addChild(itm)
                 if "group" in node: show_group(node["group"], itm)
             
         show_group(self.LayerTree, self.m_treeLayer.topLevelItem(0))
-                
+
+    #def getIndexes_fromItem(itm):
+    def getNames_fromItem(self, itm):
+        names=[]
+        while itm:
+            names.insert(0,itm.text(0))
+            itm = itm.parent()
+        return names
+    
+    def on_currentItemChanged(self, curent, prev):
+        print("on_currentItemChanged:", self.getNames_fromItem(curent))
+        
