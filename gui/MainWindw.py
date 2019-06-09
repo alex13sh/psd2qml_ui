@@ -23,7 +23,7 @@ class MyWindow(QMainWindow):
         self.m_pbOpen = QPushButton("Open")
         lay_path.addWidget(self.m_pbOpen)
         def on_pbPath():
-            self.FileNamePSD=self.m_txtPath.text(); self.read_psd()
+            self.FileNamePSD=self.m_txtPath.text(); self.read_psd(); self.showLayerTree()
         self.m_pbOpen.clicked.connect(on_pbPath)
         
         lay_grid = QGridLayout()
@@ -37,7 +37,7 @@ class MyWindow(QMainWindow):
         
         self.m_treeLayer.setColumnCount(2);
         self.m_treeLayer.setHeaderLabels(["Слой", "Тип"])
-        self.m_treeLayer.addTopLevelItems([QTreeWidgetItem([txt, "group"]) for txt in ["LOL", "KEK", "LAL"]])
+        self.m_treeLayer.addTopLevelItems([QTreeWidgetItem(["root", "group"])])
         #self.m_treeLayer.addTopLevelItems([QTreeWidgetItem(["LOL", "KEK", "LAL"])])
         
     def read_psd(self):
@@ -64,3 +64,15 @@ class MyWindow(QMainWindow):
         get_group(psd, lay_tree)
         print("lay_tree:", lay_tree)
         self.LayerTree = lay_tree
+        
+    def showLayerTree(self):
+        
+        def show_group(lay_group, tree_item):
+            if tree_item is None: return
+            for node in lay_group:
+                itm = QTreeWidgetItem([node["name"], "group" if "group" in node else "img"])
+                tree_item.addChild(itm)
+                if "group" in node: show_group(node["group"], itm)
+            
+        show_group(self.LayerTree, self.m_treeLayer.topLevelItem(0))
+                
