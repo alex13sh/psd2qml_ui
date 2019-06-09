@@ -8,6 +8,8 @@ class MyWindow(QMainWindow):
         self.resize(640, 480)
         self.setWindowTitle("Main Window")
         self.createUI()
+        
+        self.FileNamePSD = None
 
     def createUI(self):
         self.setCentralWidget(QWidget())
@@ -20,6 +22,9 @@ class MyWindow(QMainWindow):
         lay_path.addWidget(self.m_txtPath)
         self.m_pbOpen = QPushButton("Open")
         lay_path.addWidget(self.m_pbOpen)
+        def on_pbPath():
+            self.FileNamePSD=self.m_txtPath.text(); self.read_psd()
+        self.m_pbOpen.clicked.connect(on_pbPath)
         
         lay_grid = QGridLayout()
         lay.addLayout(lay_grid)
@@ -34,3 +39,28 @@ class MyWindow(QMainWindow):
         self.m_treeLayer.setHeaderLabels(["Слой", "Тип"])
         self.m_treeLayer.addTopLevelItems([QTreeWidgetItem([txt, "group"]) for txt in ["LOL", "KEK", "LAL"]])
         #self.m_treeLayer.addTopLevelItems([QTreeWidgetItem(["LOL", "KEK", "LAL"])])
+        
+    def read_psd(self):
+        from psd_tools import PSDImage
+        self.FileNamePSD = "/home/alex97sh/Документы/Projects/Python/Download/toQML/lines_2.psd"
+        psd = PSDImage.open(self.FileNamePSD)
+        
+        import re
+        reg = re.compile('[^a-zA-Z0-9_.]')
+        
+        lay_tree = []
+        def get_group(group, tree):
+            for layer in group:
+                node = {
+                    "name": reg.sub('', layer.name),
+                    "x": layer.left, "y": layer.top,
+                    "w": layer.width, "h": layer.height,
+                    #"lay": layer
+                }
+                if layer.is_group():node["group"]=[]; get_group(layer, node["group"])
+                else:
+                    pass
+                tree.append(node)
+        get_group(psd, lay_tree)
+        print("lay_tree:", lay_tree)
+        self.LayerTree = lay_tree
