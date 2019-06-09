@@ -10,6 +10,7 @@ class MyWindow(QMainWindow):
         self.createUI()
         
         self.FileNamePSD = None
+        self.LayerTree = None
         self.SelectedLayerNode = None
 
     def createUI(self):
@@ -33,9 +34,13 @@ class MyWindow(QMainWindow):
         lay_grid.addWidget(self.m_treeLayer, 0,0)
         lay_grid.setColumnStretch(0,20)
         #lay_grid.setColumnStretch(1,80)
+        
+        self.m_editLayer = EditLayer()
+        lay_grid.addWidget(self.m_editLayer, 1,0)
+        
         self.m_pbPrint = QPushButton("Print")
-        self.m_pbPrint.clicked.connect(lambda: print("Print LayerTree:", self.LayerTree))
-        lay_grid.addWidget(self.m_pbPrint, 1, 0)
+        self.m_pbPrint.clicked.connect(lambda: print("Print LayerTree:", self.SelectedLayerNode))
+        lay_grid.addWidget(self.m_pbPrint, 2, 0)
         
         self.m_treeLayer.setHeaderLabels(["Слой", "Тип", "visible"])
         self.m_treeLayer.addTopLevelItems([QTreeWidgetItem(["root", "group", "true"])])
@@ -85,7 +90,56 @@ class MyWindow(QMainWindow):
             names.insert(0,itm.text(0))
             itm = itm.parent()
         return names
-    
+    def getNode_fromNames(self, names):
+        node = None
+        currentGroup = self.LayerTree
+        for name in names[1:]:
+            for node in currentGroup:
+                if node["name"] == name:
+                    if "group" in node: 
+                        currentGroup = node["group"]
+                        break
+                    else: return node
+        return node
+                
     def on_currentItemChanged(self, curent, prev):
-        print("on_currentItemChanged:", self.getNames_fromItem(curent))
+        #print("on_currentItemChanged:", self.getNode_fromNames(self.getNames_fromItem(curent)))
+        self.SelectedLayerNode = self.getNode_fromNames(self.getNames_fromItem(curent))
+        self.m_editLayer.setLayerNode(self.SelectedLayerNode)
         
+        
+class EditLayer (QWidget):
+    def __init__(self):
+        super().__init__()
+        self.createUI()
+        self.CurrentLayerNode = None
+       
+    def createUI(self):
+        lay_grid = QGridLayout()
+        self.setLayout(lay_grid)
+        
+        lay_grid.addWidget(QLabel("Name"), 0,0)
+        self.lbName = QLabel("TEXT");   lay_grid.addWidget(self.lbName, 0,1)
+        lay_grid.setColumnStretch(0,20)
+        lay_grid.setColumnStretch(1,40)
+        
+        lay_grid.addWidget(QLabel("X"), 1,0)
+        self.lbX = QLabel("");   lay_grid.addWidget(self.lbX, 1,1)
+        lay_grid.addWidget(QLabel("Y"), 2,0)
+        self.lbY = QLabel("");   lay_grid.addWidget(self.lbY, 2,1)
+        
+        lay_grid.addWidget(QLabel("Width"), 1,2)
+        self.lbW = QLabel("");   lay_grid.addWidget(self.lbW, 1,3)
+        lay_grid.addWidget(QLabel("Height"), 2,2)
+        self.lbH = QLabel("");   lay_grid.addWidget(self.lbH, 2,3)
+        lay_grid.setColumnStretch(2,20)
+        lay_grid.setColumnStretch(3,40)
+        
+        lay_grid.setColumnStretch(4, 200)
+        
+    def setLayerNode(self, node):
+        if node is None: return
+        self.CurrentLayerNode=node
+        self.lbName.setText(node["name"])
+        self.lbX.setText(str(node["x"])); self.lbY.setText(str(node["y"]))
+        self.lbW.setText(str(node["w"])); self.lbH.setText(str(node["h"]))
