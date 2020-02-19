@@ -37,10 +37,7 @@ class MyWindow(QMainWindow):
         
         self.m_editLayer = EditLayer()
         lay_grid.addWidget(self.m_editLayer, 1,0)
-        def updateLayerEditor():
-            self.SelectedLayerNode = self.m_editLayer.CurrentLayerNode
-            self.showLayerTree()
-        self.m_editLayer.updated.connect(updateLayerEditor)
+        self.m_editLayer.updated.connect(lambda: self.updateCurentItemLayer(self.m_editLayer.CurrentLayerNode))
         
         self.m_pbPrint = QPushButton("Print")
         self.m_pbPrint.clicked.connect(lambda: print("Print LayerTree:", self.SelectedLayerNode))
@@ -83,7 +80,8 @@ class MyWindow(QMainWindow):
                 itm = QTreeWidgetItem([node["name"], "group" if "group" in node else "img", vis])
                 tree_item.addChild(itm)
                 if "group" in node: show_group(node["group"], itm)
-        self.LayerTree.clear()
+        #self.LayerTree.clear()
+        self.m_treeLayer.topLevelItem(0).takeChildren()
         show_group(self.LayerTree, self.m_treeLayer.topLevelItem(0))
 
     #def getIndexes_fromItem(itm):
@@ -104,10 +102,23 @@ class MyWindow(QMainWindow):
                         break
                     else: return node
         return node
+    
+    def setNode_byNames(self, names, node_):
+        node = self.getNode_fromNames(names)
+        node.update(node_)
+        #self.updateLayerTree(names)
+        
+    def updateCurentItemLayer(self, node):
+        self.SelectedLayerNode.update(node)
+        cur = self.SelectedLayerItem
+        vis = "false" if "visible" in node and node["visible"]==False else "true"
+        cur.setText(2, vis)
                 
     def on_currentItemChanged(self, curent, prev):
         #print("on_currentItemChanged:", self.getNode_fromNames(self.getNames_fromItem(curent)))
-        self.SelectedLayerNode = self.getNode_fromNames(self.getNames_fromItem(curent))
+        self.SelectedLayerItem = curent
+        self.SelectedLayerNames = self.getNames_fromItem(curent)
+        self.SelectedLayerNode = self.getNode_fromNames(self.SelectedLayerNames)
         self.m_editLayer.setLayerNode(self.SelectedLayerNode)
         
         
@@ -146,12 +157,13 @@ class EditLayer (QWidget):
         
     def setLayerNode(self, node):
         if node is None: return
-        self.CurrentLayerNode=node
+        self.CurrentLayerNode=None
         self.lbName.setText(node["name"])
         self.lbX.setText(str(node["x"])); self.lbY.setText(str(node["y"]))
         self.lbW.setText(str(node["w"])); self.lbH.setText(str(node["h"]))
         vis = False if "visible" in node and node["visible"]==False else True
         self.cbVisible.setChecked(vis)
+        self.CurrentLayerNode=node
         
     updated = pyqtSignal()
     def updateNode(self, node_):
