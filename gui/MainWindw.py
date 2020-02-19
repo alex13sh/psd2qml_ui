@@ -37,6 +37,10 @@ class MyWindow(QMainWindow):
         
         self.m_editLayer = EditLayer()
         lay_grid.addWidget(self.m_editLayer, 1,0)
+        def updateLayerEditor():
+            self.SelectedLayerNode = self.m_editLayer.CurrentLayerNode
+            self.showLayerTree()
+        self.m_editLayer.updated.connect(updateLayerEditor)
         
         self.m_pbPrint = QPushButton("Print")
         self.m_pbPrint.clicked.connect(lambda: print("Print LayerTree:", self.SelectedLayerNode))
@@ -48,7 +52,7 @@ class MyWindow(QMainWindow):
         
     def read_psd(self):
         from psd_tools import PSDImage
-        self.FileNamePSD = "/home/alex97sh/Документы/Projects/Python/Download/toQML/lines_2.psd"
+        self.FileNamePSD = "./lines_2.psd"
         psd = PSDImage.open(self.FileNamePSD)
         
         import re
@@ -72,7 +76,6 @@ class MyWindow(QMainWindow):
         self.LayerTree = lay_tree
         
     def showLayerTree(self):
-        
         def show_group(lay_group, tree_item):
             if tree_item is None: return
             for node in lay_group:
@@ -80,7 +83,7 @@ class MyWindow(QMainWindow):
                 itm = QTreeWidgetItem([node["name"], "group" if "group" in node else "img", vis])
                 tree_item.addChild(itm)
                 if "group" in node: show_group(node["group"], itm)
-            
+        self.LayerTree.clear()
         show_group(self.LayerTree, self.m_treeLayer.topLevelItem(0))
 
     #def getIndexes_fromItem(itm):
@@ -135,6 +138,10 @@ class EditLayer (QWidget):
         lay_grid.setColumnStretch(2,20)
         lay_grid.setColumnStretch(3,40)
         
+        lay_grid.addWidget(QLabel("Options"), 0,4)
+        self.cbVisible = QCheckBox("Visible"); lay_grid.addWidget(self.cbVisible, 1,4)
+        self.cbVisible.toggled.connect(lambda vis: self.updateNode({"visible": vis}))
+        
         lay_grid.setColumnStretch(4, 200)
         
     def setLayerNode(self, node):
@@ -143,3 +150,13 @@ class EditLayer (QWidget):
         self.lbName.setText(node["name"])
         self.lbX.setText(str(node["x"])); self.lbY.setText(str(node["y"]))
         self.lbW.setText(str(node["w"])); self.lbH.setText(str(node["h"]))
+        vis = False if "visible" in node and node["visible"]==False else True
+        self.cbVisible.setChecked(vis)
+        
+    updated = pyqtSignal()
+    def updateNode(self, node_):
+        if not self.CurrentLayerNode: return
+        #print("Update Node:", node_)
+        self.CurrentLayerNode.update(node_)
+        #print("Update Node:", self.CurrentLayerNode)
+        self.updated.emit()
