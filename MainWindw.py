@@ -7,4 +7,4 @@ class MyWindow(MyMainWindw):
         self.resize(640, 480)
         self.setWindowTitle("My Main Window")
         
-        self.m_pbPrint.clicked.connect(gen.func)
+        self.m_pbPrint.clicked.connect(lambda: gen.gen_qml_bynode(self.SelectedLayerNode, {}))
