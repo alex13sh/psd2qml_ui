@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QApplication
-from gui.MainWindw import MyWindow
+from MainWindw import MyWindow
 
 def startApp(postWinFunc=None):
     import sys
