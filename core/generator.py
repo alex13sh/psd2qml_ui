@@ -3,28 +3,25 @@ def func():
 
 import json    
 def gen_qml_bynode(node, opt):
-    #print("Gen node:", json.dumps(node,indent=3))
-    childs = []
-    newnode={}
-    for nod, newnod in for_node_tree_create(node,newnode, reverse=True):
-        name = nod["name"]
-        newnod["id"] = "id_"+name
-        print("node name:", name, ", newnod:", newnod)
-        
+    res = ""
+    typ = "Item" if "group" in node else "Image"
     
-def for_node_tree(node, reverse=False, lvl=0):
-    #print("for_node")
-    if not reverse: yield node, lvl
-    for nod in node.get("group", []):
-        yield from for_node_tree(nod,reverse, lvl+1)     
-    if reverse: yield node, lvl
-    
-def for_node_tree_create(node, newnode, reverse=False):
-    #print("for_node")
-    if not reverse: yield node, newnode
-    childs = []
-    for nod in node.get("group", []):
-        newchild = {}; childs.append(newchild)
-        yield from for_node_tree_create(nod, newchild, reverse)
-    if len(childs)>0: newnode.update({"cilds:":childs})
-    if reverse: yield node, newnode
+    txt_childs = ""
+    if typ=="Item":
+        for nod in node["group"]:
+            txt_childs += gen_qml_bynode(nod, opt)
+        txt_childs = txt_childs.replace("\n", "\n"+" "*4)
+            
+    txt = """
+{type}{{
+    id: {id}
+    x: {x}; y: {y}
+    width: {w}; height: {h}
+{txt_childs}
+}}"""
+    newnode = node.copy()
+    if not "type" in newnode: 
+        newnode.update({"type": typ, "id": "id_"+newnode["name"], "txt_childs": txt_childs})
+    res = txt.format(**newnode)
+    print("\nRes:\n", res)
+    return res
