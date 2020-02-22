@@ -40,7 +40,10 @@ def process_node(node, path="./"):
                     f.write(txt_node)
             
         txt_childs = txt_childs.replace("\n", "\n"+" "*4)
-        return gen.gen_qml_item(node, txt_childs=txt_childs)
+        res = gen.gen_qml_item(node, txt_childs=txt_childs)
+        if node.get("opt", {}).get("in_sep_dir", False):
+            with open(nod_path+nod["name"]+"/"+nod["name"]+".qml", "w") as f:
+                    f.write(res)
     else: 
         lay = node.get("lay", None)
         if lay:
