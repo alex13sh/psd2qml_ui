@@ -16,6 +16,7 @@ class QmlNode:
         if node: self.getfromNode(node)
         #if type(parent) == QmlNode:
         self._parent = parent
+        self._imports_path = []
     
     def getfromNode(self, node):
         self._name = node["name"]
@@ -36,11 +37,12 @@ class QmlNode:
         nod.getfromNode(node)
         return nod
     
-    def setPath(self, path_file="./", path_qml="./"):
+    def setPath(self, path_file="./", path_app=None):
         self._path_file = path_file # Путь относительно app.py или абсолютный для создания файлов
-        self._path_app = path_file 
-        self._path_qml = path_qml # Путь относительно созданного qml файла или абсолютный для ссалки на изображения.
+        self._path_app = path_app if path_app else path_file
         import os
+        self._path_qml = os.path.relpath(path_app, path_file)+"/" # Путь относительно созданного qml файла или абсолютный для ссалки на изображения.
+        
         try: os.mkdir(self._path_app)
         except: print("Error path:", self._path_app)
         
@@ -51,15 +53,14 @@ class QmlNode:
         import os
         
         if opt.in_sep_dir:
-            self._path_app = self._parent._path_app + self._name + "/"
+            self._path_app = os.path.join(self._parent._path_app, self._name)
         else: self._path_app = self._parent._path_app
         
         if opt.in_sep_file and opt.file_in_sep_dir:
             self._path_file = self._path_app # opt.in_sep_dir
-            self._path_qml = "./"
-        else: 
-            self._path_file = self._parent._path_file
-            self._path_qml = self._parent._path_qml + (self._name + "/" if opt.in_sep_dir else "")
+        else: self._path_file = self._parent._path_file
+        
+        self._path_qml = os.path.relpath(self._path_app, self._path_file)+"/"
             
         try: os.mkdir(self._path_app)
         except: pass

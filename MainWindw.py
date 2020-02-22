@@ -10,7 +10,7 @@ class MyWindow(MyMainWindw):
         
         def gen_file():
             qmlnode = QmlNode(node=self.SelectedLayerNode)
-            qmlnode.setPath(path_file="./test/") #("./", "./test/")
+            qmlnode.setPath("./", "./test/")
             qmlnode.process_node()
             qmlnode.createFile()
         self.m_pbPrint.clicked.connect(gen_file)
