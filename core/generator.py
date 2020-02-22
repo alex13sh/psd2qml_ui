@@ -31,7 +31,7 @@ Image{{
     id: img_{name}
     x: {x}; y: {y}
     width: {w}; height: {h}
-    source: {source}
+    source: "{source}"
 }}"""
     newnode = node.copy()
     if not "type" in newnode: 
@@ -39,17 +39,16 @@ Image{{
     res = txt.format(**newnode)
     return res
 
-def gen_qml_type(node, tree=False):
+def gen_qml_item(node, tree=False, txt_childs=""):
     res = ""
     
-    txt_childs = ""
     if tree:
         for nod in node.get("group",[]):
             txt_childs += gen_qml_type(nod, tree)
         txt_childs = txt_childs.replace("\n", "\n"+" "*4)
         
     txt = """
-{type}{{
+Item{{
     id: {id}
     x: {x}; y: {y}
     width: {w}; height: {h}
@@ -57,6 +56,6 @@ def gen_qml_type(node, tree=False):
 }}"""
     newnode = node.copy()
     if not "type" in newnode: 
-        newnode.update({"type": typ, "id": "id_"+newnode["name"], "txt_childs": txt_childs})
+        newnode.update({"id": "id_"+newnode["name"], "txt_childs": txt_childs})
     res = txt.format(**newnode)
     return res

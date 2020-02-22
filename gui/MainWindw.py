@@ -62,7 +62,7 @@ class MyWindow(QMainWindow):
                     "name": reg.sub('', layer.name),
                     "x": layer.left, "y": layer.top,
                     "w": layer.width, "h": layer.height,
-                    #"lay": layer
+                    "lay": layer
                 }
                 if layer.is_group():node["group"]=[]; get_group(layer, node["group"])
                 else:
