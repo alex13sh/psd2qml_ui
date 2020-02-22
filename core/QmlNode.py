@@ -72,13 +72,16 @@ class QmlNode:
     def process_node(self):
         if self._type=="Item":
             self._txt_childs=""
+            self._imports_path = []
             for nod in self._childs:
                 nod.updatePath()
                 nod.process_node()
-                if not self.opt_sep.in_sep_file: 
+                if not nod.opt_sep.in_sep_file: 
                     self._txt_childs += nod._txt_node
                 else:
                     nod.createFile()
+                    if nod.opt_sep.in_sep_dir and nod.opt_sep.file_in_sep_dir:
+                        self._imports_path.append(nod._path_file)
             self._txt_childs = self._txt_childs.replace("\n", "\n"+" "*4)
             self._txt_node = self.gen_item()
         else: 
@@ -87,6 +90,9 @@ class QmlNode:
             
     def createFile(self):
         with open(self._path_file+self._name+".qml", "w") as f:
+            f.write("import QtQuick 2.0\n")
+            for path in self._imports_path:
+                f.write(f"import \"{path}\"\n")
             f.write(self._txt_node)
     def createImageFile(self):
         if self._lay:
