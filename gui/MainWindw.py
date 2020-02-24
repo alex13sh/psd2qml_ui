@@ -49,7 +49,7 @@ class MyWindow(QMainWindow):
         
     def read_psd(self):
         from psd_tools import PSDImage
-        self.FileNamePSD = "./lines_2.psd"
+        #self.FileNamePSD = "./lines_2.psd"
         psd = PSDImage.open(self.FileNamePSD)
         
         import re
@@ -153,6 +153,16 @@ class EditLayer (QWidget):
         self.cbVisible = QCheckBox("Visible"); lay_grid.addWidget(self.cbVisible, 1,4)
         self.cbVisible.toggled.connect(lambda vis: self.updateNode({"visible": vis}))
         
+        def setOpt(opt, enb):
+            if self.CurrentLayerNode:
+                if not "opt" in self.CurrentLayerNode: self.CurrentLayerNode["opt"] = {}
+                self.CurrentLayerNode["opt"][opt] = enb
+        self.cb_in_sep_dir = QCheckBox("in sep dir"); lay_grid.addWidget(self.cb_in_sep_dir, 2,4)
+        self.cb_in_sep_dir.toggled.connect(lambda enb: setOpt("in_sep_dir",enb))
+        self.cb_in_sep_file = QCheckBox("in sep file"); lay_grid.addWidget(self.cb_in_sep_file, 3,4)
+        self.cb_in_sep_file.toggled.connect(lambda enb: setOpt("in_sep_file", enb))
+                
+        
         lay_grid.setColumnStretch(4, 200)
         
     def setLayerNode(self, node):
@@ -161,8 +171,9 @@ class EditLayer (QWidget):
         self.lbName.setText(node["name"])
         self.lbX.setText(str(node["x"])); self.lbY.setText(str(node["y"]))
         self.lbW.setText(str(node["w"])); self.lbH.setText(str(node["h"]))
-        vis = False if "visible" in node and node["visible"]==False else True
-        self.cbVisible.setChecked(vis)
+        self.cbVisible.setChecked(node.get("visible", True))
+        self.cb_in_sep_dir.setChecked(node.get("opt", {}).get("in_sep_dir", False))
+        self.cb_in_sep_file.setChecked(node.get("opt", {}).get("in_sep_file", False))
         self.CurrentLayerNode=node
         
     updated = pyqtSignal()

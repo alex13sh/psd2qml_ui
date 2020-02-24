@@ -14,3 +14,5 @@ class MyWindow(MyMainWindw):
             qmlnode.process_node()
             qmlnode.createFile()
         self.m_pbPrint.clicked.connect(gen_file)
+        
+        self.m_txtPath.setText("./lines_2.psd")

@@ -6,7 +6,10 @@ class GenerateOpt:
     file_in_sep_dir = True # else in_cur_dir
     file_hold_prop_pos = False # True - свойства позиции храняться в отдельном файле, иначе они указываются в файле использования.
     
-    #def is
+    def __init__(self, node=None):
+        if node:
+            self.in_sep_dir = node.get("in_sep_dir", False)
+            self.in_sep_file = node.get("in_sep_file", False)
     
 class QmlNode:
     path = "./"
@@ -26,6 +29,7 @@ class QmlNode:
         self._w = node["w"]; self._h = node["h"]
         self._source = node.get("source", None)
         self._lay = node.get("lay", None)
+        self.opt_sep = GenerateOpt(node.get("opt", None))
         self._type = "Item" if "group" in node else "Image"
         self._childs = []
         for nod in node.get("group", []):
