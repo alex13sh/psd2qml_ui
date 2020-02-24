@@ -10,7 +10,10 @@ class GenerateOpt:
         if node:
             self.in_sep_dir = node.get("in_sep_dir", False)
             self.in_sep_file = node.get("in_sep_file", False)
-    
+  
+import os
+from os.path import join
+
 class QmlNode:
     path = "./"
     opt_sep = GenerateOpt()
@@ -54,10 +57,10 @@ class QmlNode:
         if opt: self.opt_sep=opt
         else: opt = self.opt_sep
         if not self._parent or not opt: return
-        import os
+        
         
         if opt.in_sep_dir:
-            self._path_app = os.path.join(self._parent._path_app, self._name)
+            self._path_app = join(self._parent._path_app, self._name)
         else: self._path_app = self._parent._path_app
         
         if opt.in_sep_file and opt.file_in_sep_dir:
@@ -94,7 +97,7 @@ class QmlNode:
             self._txt_node = self.gen_image()
             
     def createFile(self):
-        with open(self._path_file+self._name+".qml", "w") as f:
+        with open(join(self._path_file,self._name+".qml"), "w") as f:
             f.write("import QtQuick 2.0\n")
             for path in self._imports_path:
                 f.write(f"import \"{path}\"\n")
@@ -102,8 +105,8 @@ class QmlNode:
     def createImageFile(self):
         if self._lay:
             img = self._lay.topil()
-            self._source = self._path_qml+ self._name+".png"
-            img.save(self._path_app+ self._name+".png")
+            self._source = join(self._path_qml, self._name+".png")
+            img.save(join(self._path_app, self._name+".png"))
     
 txt_item = """
 Item{{
