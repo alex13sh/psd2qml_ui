@@ -33,6 +33,7 @@ class QmlNode:
         self._source = node.get("source", None)
         self._lay = node.get("lay", None)
         self.opt_sep = GenerateOpt(node.get("opt", None))
+        self._visible = MyBool(node.get("visible", True))
         self._type = "Item" if "group" in node else "Image"
         self._childs = []
         for nod in node.get("group", []):
@@ -116,6 +117,7 @@ class QmlNode:
 txt_item = """
 Item{{
     id: {_id}
+    visible: {_visible}
     x: {_x}; y: {_y}
     width: {_w}; height: {_h}
 {_txt_childs}
@@ -124,6 +126,7 @@ Item{{
 txt_image = """
 Image{{
     id: img_{_name}
+    visible: {_visible}
     x: {_x}; y: {_y}
     width: {_w}; height: {_h}
     source: "{_source}"
@@ -136,8 +139,20 @@ Loader{{
 """
 txt_loader_full = """
 Loader{{
+    id: loader_{_name}
+    visible: {_visible}
     x: {_x}; y: {_y}
     width: {_w}; height: {_h}
     source: "{source}"
 }}
 """
+
+class MyBool:
+    def __init__(self, b):
+        self.bool = b
+    def __str__(self):
+        return "true" if self.bool else "false"
+    def __repr__(self):
+        return f"MyBool({self.bool})"
+    def __bool__(self): return self.bool
+    
