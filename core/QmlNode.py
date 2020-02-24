@@ -76,6 +76,9 @@ class QmlNode:
         return txt_item.format(**self.__dict__)
     def gen_image(self):
         return txt_image.format(**self.__dict__)
+    def gen_loader(self, source=None):
+        if not source: source=join(self._path_file, self._name+".qml")
+        return txt_loader_full.format(source=source, **self.__dict__)
     
     def process_node(self):
         if self._type=="Item":
@@ -89,7 +92,9 @@ class QmlNode:
                 else:
                     nod.createFile()
                     if nod.opt_sep.in_sep_dir and nod.opt_sep.file_in_sep_dir:
-                        self._imports_path.append(nod._path_file)
+                        #self._imports_path.append(nod._path_file)
+                        self._txt_childs += nod.gen_loader(join(os.path.relpath(nod._path_file, self._path_file), nod._name+".qml"))
+                        
             self._txt_childs = self._txt_childs.replace("\n", "\n"+" "*4)
             self._txt_node = self.gen_item()
         else: 
@@ -123,3 +128,16 @@ Image{{
     width: {_w}; height: {_h}
     source: "{_source}"
 }}"""
+
+txt_loader_small = """
+Loader{{
+    source: {source}
+}}
+"""
+txt_loader_full = """
+Loader{{
+    x: {_x}; y: {_y}
+    width: {_w}; height: {_h}
+    source: "{source}"
+}}
+"""
